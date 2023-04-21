@@ -268,14 +268,14 @@ def quantizeImage(imgOrig: np.ndarray, nQuant: int, nIter: int) ->(List[np.ndarr
         return math.sqrt(delta)/ pixelNum
 
     # Create a quantalized image.
-    def quantImg() -> np.ndarray:
+    def quanFunc() -> np.ndarray:
         qImg = np.zeros(im.shape)
         for i in range(nQuant):
             select = (im >= z[i]) & (im < z[i + 1])
             qImg[select] = q[i]
         return qImg
 
-    # QImage in arr for Err and QImage.
+    # quantalized image in arr for Err and QImage.
     z[nQuant] = 256
     arr_qim = []
     arr_errors = []
@@ -284,10 +284,10 @@ def quantizeImage(imgOrig: np.ndarray, nQuant: int, nIter: int) ->(List[np.ndarr
         Q()
         if (YIQ is not None):
             qim = YIQ.copy()
-            qim[:, :, 0] = (quantImg() / 255)
+            qim[:, :, 0] = (quanFunc() / 255)
             qim = transformYIQ2RGB(qim)
         else:
-            qim = quantImg()
+            qim = quanFunc()
         arr_qim.append(qim)
         arr_errors.append(Errors())
 
