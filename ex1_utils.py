@@ -225,7 +225,7 @@ def quantizeImage(imgOrig: np.ndarray, nQuant: int, nIter: int) ->(List[np.ndarr
         for i in range(1, nQuant - 1):
             z[i] = (q[i] + q[i - 1]) / 2
 
-    # calculating Q 
+    # calculating Q
     def Q():
         for i in range(nQuant):
             minz = z[i]
@@ -243,48 +243,44 @@ def quantizeImage(imgOrig: np.ndarray, nQuant: int, nIter: int) ->(List[np.ndarr
             intensities = range_z[minz:maxz]
             q[i] = (pix @ intensities) / pixels
 
-
     def Errors() -> float:
-        delta = 0
+        error = 0
         for i in range(nQuant):
-            minz = z[i]
-            maxz = z[i + 1]
-            if minz == 0:
-                minc = 0
+            start = z[i]
+            end = z[i + 1]
+
+            if start != 0:
+                minc = cumsum[start - 1]
             else:
-                minc = cumsum[minz - 1]
+                minc = 0
+            pixels = cumsum[end - 1] - minc
+            intensities = range_z[start:end]
+            histogram = histoOrig[start:end]
 
-            pixels = cumsum[maxz - 1] - minc
-            intensities = range_z[minz:maxz]
-            pix = histoOrig[minz:maxz]
+            squared_error = ((intensities - q[i]) ** 2) @ histogram
+            error += squared_error
+        return math.sqrt(error) / pixelNum
 
-            qdelta = ((intensities - q[i]) ** 2)
-            qdelta = qdelta @ pix
-            delta += qdelta
-        return math.sqrt(delta)/ pixelNum
-
-    # quantalized image function 
+    # quantalized image function
     def quanFunc() -> np.ndarray:
         qImg = np.zeros(im.shape)
         for i in range(nQuant):
             select = (im >= z[i]) & (im < z[i + 1])
-            qImg[select] = q[i]
+            qImg[select] = q[i] if i < nQuant - 1 else q[i - 1]
         return qImg
 
     # quantalized image in arr for Err and QImage.
+    qImageArr = []
+    errorsArr = []
+
     z[nQuant] = 256
-    arr_qim = []
-    arr_errors = []
     for i in range(nIter):
         Z()
         Q()
-        if (YIQ is not None):
-            qim = YIQ.copy()
-            qim[:, :, 0] = (quanFunc() / 255)
-            qim = transformYIQ2RGB(qim)
-        else:
-            qim = quanFunc()
-        arr_qim.append(qim)
-        arr_errors.append(Errors())
+        qim = YIQ.copy() if YIQ is not None else quanFunc()
+        qim[:, 0] = (qim[:, 0] / 255)
+        qim = transformYIQ2RGB(qim) if YIQ is not None else qim
+        qImageArr.append(qim)
+        errorsArr.append(Errors())
 
-    return arr_qim, arr_errors
+    return qImageArr, errorsArr
