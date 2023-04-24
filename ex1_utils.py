@@ -120,16 +120,15 @@ def transformYIQ2RGB(imgYIQ: np.ndarray) -> np.ndarray:
         return
 
 
-def imHistogram(img: np.ndarray) -> np.ndarray:
+def createHistogram(img: np.ndarray) -> np.ndarray:
     """
-        This is internal function create a histogram of a given image.
-        img  : image in grayscale a.k.a 2D, with ranges [0, 255]
+    :param img: input grayscale image with ranges [0, 255]
+    :return: histogram of the input image
     """
-    histo = np.zeros((256),dtype=int)
-    for column in img:
-        for pixel in column:
-            histo[pixel] += 1
-    return histo
+    hist = np.zeros((256), dtype=int)
+    for i in range(256):
+        hist[i] = np.sum(img == i)
+    return hist
 
 # 4.4
 def hsitogramEqualize(imgOrig: np.ndarray) ->(np.ndarray,np.ndarray,np.ndarray):
