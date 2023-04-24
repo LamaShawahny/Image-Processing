@@ -39,8 +39,6 @@ def checkImage(image: np.ndarray) -> bool:
         print("Given input cannot be an image. The shape must be either (height, width) or (height, width, 3).")
         return False
 
-
-
 # 4.1
 def imReadAndConvert(filename: str, representation: int) -> np.ndarray:
     """
@@ -119,7 +117,7 @@ def transformYIQ2RGB(imgYIQ: np.ndarray) -> np.ndarray:
     else:
         return
 
-
+# 4.4
 def createHistogram(img: np.ndarray) -> np.ndarray:
     """
     :param img: input grayscale image with ranges [0, 255]
@@ -199,7 +197,6 @@ def quantizeImage(imgOrig: np.ndarray, nQuant: int, nIter: int) ->(List[np.ndarr
     else:
         im: np.ndarray = np.ceil(imgOrig * 255).astype(int)
 
-    # Initialize the Q's and Z's
     pixelNum = im.shape[0] * im.shape[1]
     histoOrig = createHistogram(im)
     # Initialize Z
@@ -228,7 +225,7 @@ def quantizeImage(imgOrig: np.ndarray, nQuant: int, nIter: int) ->(List[np.ndarr
         for i in range(1, nQuant - 1):
             z[i] = (q[i] + q[i - 1]) / 2
 
-    # Create internal function for calculating Q, given Z
+    # calculating Q 
     def Q():
         for i in range(nQuant):
             minz = z[i]
@@ -266,7 +263,7 @@ def quantizeImage(imgOrig: np.ndarray, nQuant: int, nIter: int) ->(List[np.ndarr
             delta += qdelta
         return math.sqrt(delta)/ pixelNum
 
-    # Create a quantalized image.
+    # quantalized image function 
     def quanFunc() -> np.ndarray:
         qImg = np.zeros(im.shape)
         for i in range(nQuant):
