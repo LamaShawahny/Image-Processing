@@ -146,7 +146,7 @@ def hsitogramEqualize(imgOrig: np.ndarray) ->(np.ndarray,np.ndarray,np.ndarray):
             im: np.ndarray = np.round(im * 255).astype(int)
         else:
             im: np.ndarray = np.round(imgOrig * 255).astype(int)
-        histoOrig = imHistogram(im)
+        histoOrig = createHistogram(im)
 
         # numbers of pixels in the image
         pixelNum = im.shape[0] * im.shape[1]
@@ -166,7 +166,7 @@ def hsitogramEqualize(imgOrig: np.ndarray) ->(np.ndarray,np.ndarray,np.ndarray):
                 intensity = im[x][y]
                 EqualImg[x][y] = lut[intensity]
 
-        Eq_histogram = imHistogram(EqualImg)
+        Eq_histogram = createHistogram(EqualImg)
         EqualImg = EqualImg/255
         if leng == 3:
             # convert back to RGB
@@ -200,7 +200,7 @@ def quantizeImage(imgOrig: np.ndarray, nQuant: int, nIter: int) ->(List[np.ndarr
 
     # Initialize the Q's and Z's
     pixelNum = im.shape[0] * im.shape[1]
-    histoOrig = imHistogram(im)
+    histoOrig = createHistogram(im)
     # Initialize Z
     z = np.zeros(nQuant + 1, dtype=int)
     # Initialize q
