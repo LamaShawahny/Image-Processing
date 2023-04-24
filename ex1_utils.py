@@ -69,20 +69,19 @@ def imDisplay(filename: str, representation: int) ->None:
     :param representation: GRAY_SCALE or RGB
     :return: The image object
     """
-    im = imReadAndConvert(filename, representation)
-    if im is not None:
-        helperFun(im)
-
-# helpper function for imDisplay
-def helperFun(img: np.ndarray):
-    if checkImage(img):
-        l = len(img.shape)
-        if l == 2:
-            plt.imshow(img, cmap='gray')
+    img = imReadAndConvert(filename, representation)
+    if img is not None:
+        if checkImage(img):
+            l = len(img.shape)
+            if l == 2:
+                plt.imshow(img, cmap='gray')
+            else:
+                plt.imshow(img)
+            plt.show()
         else:
-            plt.imshow(img)
-        plt.show()
+            return
     else:
+        print("Image could not be read.")
         return
 
 #4.3
