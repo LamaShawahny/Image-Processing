@@ -125,57 +125,58 @@ def createHistogram(img: np.ndarray) -> np.ndarray:
     :param img: input grayscale image with ranges [0, 255]
     :return: histogram of the input image
     """
-    hist = np.zeros((256), dtype=int)
+    hist = np.zeros((256), dtype=float)
     for i in range(256):
         hist[i] = np.sum(img == i)
     return hist
 
-# 4.4
+
 def hsitogramEqualize(imgOrig: np.ndarray) ->(np.ndarray,np.ndarray,np.ndarray):
     """
         Equalizes the histogram of an image
         :param imgOrig: Original Histogram
         :ret
     """
-    if checkImage(imgOrig):
-        # Convert any image to grayscale 256, save the original YIQ if its RGB
-        leng = len(imgOrig.shape)
-        if leng == 3:
-            YIQ = transformRGB2YIQ(imgOrig)
-            im = YIQ[:, :, 0]
-            im: np.ndarray = np.round(im * 255).astype(int)
-        else:
-            im: np.ndarray = np.round(imgOrig * 255).astype(int)
-        histoOrig = createHistogram(im)
-
-        # numbers of pixels in the image
-        pixelNum = im.shape[0] * im.shape[1]
-
-        # create lut and cumsum
-        cumsum = np.zeros((256), dtype=int)
-        lut = np.zeros((256), dtype=int)
-        cumsum[0] = histoOrig[0]
-        for i in range(1, 256):
-            cumsum[i] = cumsum[i - 1] + histoOrig[i]
-        lut = np.ceil(cumsum * 255 / pixelNum).astype(int)
-
-        EqualImg = np.zeros(im.shape, dtype=int)
-
-        for x in range(0, EqualImg.shape[0]):
-            for y in range(0, EqualImg.shape[1]):
-                intensity = im[x][y]
-                EqualImg[x][y] = lut[intensity]
-
-        Eq_histogram = createHistogram(EqualImg)
-        EqualImg = EqualImg/255
-        if leng == 3:
-            # convert back to RGB
-            YIQ[:, :, 0] = EqualImg
-            img = transformYIQ2RGB(YIQ)
-            return img, histoOrig, Eq_histogram
-        return EqualImg, histoOrig, Eq_histogram
-    else:
+    if not checkImage(imgOrig):
         return
+
+    # transformRGB2YIQ or save original YIQ if it's RGB
+    if len(imgOrig.shape) == 3:
+        YIQ = transformRGB2YIQ(imgOrig)
+        im = YIQ[:, :, 0]
+    else:
+        im = imgOrig
+
+    # Round image values to the nearest integer and scale to 0-255 range
+    im = np.round(im * 255).astype(int)
+
+    # Compute the number of pixels in the image and the original histogram
+    pixelNum = im.shape[0] * im.shape[1]
+    histOrg = createHistogram(im)
+
+    # Compute cumulative sum of the histogram and LUT
+    cumsum = np.cumsum(histOrg)
+    lut = np.ceil(cumsum * 255 / pixelNum).astype(int)
+
+    # Compute the new image with the equalized histogram using the LUT
+    imEq = lut[im]
+
+    # Compute the histogram of the equalized image and normalize it
+    histEQ = createHistogram(imEq)
+    histEQ = histEQ / pixelNum
+
+    # Scale pixel values of the equalized image back to 0-1 range
+    imEq = imEq / 255
+
+    # Convert the equalized image back to RGB if the input image was RGB
+    if len(imgOrig.shape) == 3:
+        YIQ[:, :, 0] = imEq
+        img = transformYIQ2RGB(YIQ)
+        return img, histOrg, histEQ
+
+    # Return the equalized grayscale image and the histograms
+    return imEq, histOrg, histEQ
+
 #4.5
 def quantizeImage(imgOrig: np.ndarray, nQuant: int, nIter: int) ->(List[np.ndarray],List[float]):
     """
